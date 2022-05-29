@@ -8,7 +8,7 @@ import { safeRedirect } from "~/utils";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
-  const redirectTo = url.searchParams.get("redirectTo") || "/";
+  const redirectTo = url.searchParams.get("redirect") || "/";
   const session = await sessionStorage.getSession(
     request.headers.get("cookie")
   );

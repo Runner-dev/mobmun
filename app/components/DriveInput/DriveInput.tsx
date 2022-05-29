@@ -35,16 +35,18 @@ export default function DriveInput({
 
   return (
     <>
-      <div className="w-full p-2 bg-gray-200 rounded-lg">
+      <div className="flex items-center w-full p-2 bg-gray-200 rounded-lg">
         <button
           type="button"
           onClick={handleOpenPicker}
-          className="p-2 mr-2 text-white transition bg-blue-500 rounded hover:bg-blue-400"
+          className="flex p-2 mr-2 text-white transition bg-blue-500 rounded w- whitespace-nowrap hover:bg-blue-400"
         >
           Escolher Arquivo
         </button>
         {data?.docs.length ? (
-          <span>{data?.docs[0].name}</span>
+          <span className="flex-1 overflow-clip overflow-ellipsis whitespace-nowrap">
+            {data?.docs[0].name}
+          </span>
         ) : (
           <span>Nenhum documento selecionado</span>
         )}
