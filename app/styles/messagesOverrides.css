@@ -1,0 +1,18 @@
+.str-chat {
+  height: calc(100vh - 4rem) !important;
+  min-height: 0 !important;
+}
+
+@media screen and (max-width: 960px) {
+  .str-chat-channel-list {
+    top: 4rem !important;
+    z-index: 10 !important;
+  }
+}
+
+@media screen and (min-width: 960px) {
+  .str-chat-channel-list {
+    position: relative;
+    z-index: 10 !important;
+  }
+}

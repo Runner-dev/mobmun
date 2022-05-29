@@ -1,0 +1,107 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String @id @default(cuid())
+  displayName String
+  email       String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  googleRefreshToken GoogleRefreshToken?
+  Representative     Representative?
+}
+
+model GoogleRefreshToken {
+  refreshToken String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model Country {
+  id              String           @id @default(cuid())
+  name            String
+  flag            String
+  representatives Representative[]
+
+  Alliance   Alliance? @relation(fields: [allianceId], references: [id])
+  allianceId String?
+
+  SharingCountries SharingCountry[]
+}
+
+model Representative {
+  id   String @id @default(cuid())
+  name String
+
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  countryId String  @unique
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model Alliance {
+  id   String @id @default(cuid())
+  name String
+
+  countries Country[]
+  sharings  Sharing[]
+}
+
+model Announcement {
+  id String @id @default(cuid())
+
+  content       String
+  fictionalDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Article {
+
+  title   String
+  slug    String @id @unique
+  content String
+  author  String
+  newsOrg String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  name      String
+  uploaded  Boolean  @default(false)
+  sharingId String   @unique
+  sharing   Sharing? @relation(fields: [sharingId], references: [id])
+}
+
+model Sharing {
+  id             String           @id @default(cuid())
+  document       Document?
+  sharingCountry SharingCountry[]
+  public         Boolean          @default(false)
+
+  alliance   Alliance? @relation(fields: [allianceId], references: [id])
+  allianceId String?
+}
+
+model SharingCountry {
+  id        String  @id @default(cuid())
+  countryId String
+  country   Country @relation(fields: [countryId], references: [id])
+
+  sharingId String
+  sharing   Sharing @relation(fields: [sharingId], references: [id])
+}
