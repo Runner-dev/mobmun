@@ -26,7 +26,7 @@ export default function Announcements() {
             const fictionalDate = new Date(announcement.fictionalDate);
             return (
               <li key={announcement.id} className="text-2xl uppercase">
-                {fictionalDate.toLocaleDateString("en-GB")} -
+                {fictionalDate.toLocaleDateString("en-GB")} -&nbsp;
                 {announcement.content}
               </li>
             );

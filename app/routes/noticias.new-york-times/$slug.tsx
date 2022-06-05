@@ -1,6 +1,7 @@
 import { useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
+import draftToHtml from "draftjs-to-html";
 import sanitizer from "sanitizer";
 import invariant from "tiny-invariant";
 import type { Article } from "~/models/article.server";
@@ -14,7 +15,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   invariant(typeof params.slug === "string", "slug must be a string");
   const article = await getArticleBySlug(params.slug);
   if (!article) throw new Response("Article Not Found", { status: 404 });
-  const sanitizedContent = sanitizer.sanitize(article.content);
+  const content = draftToHtml(JSON.parse(article.content));
+  const sanitizedContent = sanitizer.sanitize(content);
   return json<LoaderData>({
     article: {
       ...article,
@@ -27,7 +29,8 @@ export default function NYTArticle() {
   const { article } = useLoaderData() as LoaderData;
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-5rem)] w-max max-w-[80ch] bg-white p-8 font-serif shadow-md">
+    // <main className="mx-auto min-h-[calc(100vh-5rem)] w-max max-w-[80ch] bg-white p-8 font-serif shadow-md">
+    <main className="relative mx-auto min-h-[calc(100vh-5rem)] w-full max-w-screen-md bg-white p-8 shadow">
       <h1 className="text-4xl font-bold text-justify max-w-prose">
         {article.title}
       </h1>
@@ -49,7 +52,7 @@ export default function NYTArticle() {
         {article.author}
       </div>
       <div
-        className="mx-auto mt-4 prose max-w-prose prose-p:text-justify prose-p:text-lg"
+        className="px-4 mt-4 prose prose-p:text-justify prose-p:text-lg"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
     </main>

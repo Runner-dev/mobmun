@@ -1,0 +1,13 @@
+.ql-container {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif
+}
+
+.rdw-image-modal-upload-option-label {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  max-height: 120px;
+  max-width: 100%;
+  overflow: clip;
+  text-overflow: ellipsis;
+  overflow-wrap: anywhere
+}

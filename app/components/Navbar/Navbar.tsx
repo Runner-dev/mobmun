@@ -1,14 +1,31 @@
-import { Form, Link, useLocation, useMatches } from "@remix-run/react";
+import { Form, Link, useLocation } from "@remix-run/react";
 import { useMemo } from "react";
 import { useOptionalUser } from "~/utils";
 
-const navItems = [
-  ["/anuncios", "Anúncios"],
-  ["/documentos", "Documentos"],
-  ["/noticias", "Notícias"],
-  ["/mensagens", "Mensagens"],
-  ["/espionagem", "Espionagem"],
-  ["/mapas", "Mapas"],
+type NavItem = {
+  path: string;
+  name: string;
+  authenticated?: boolean;
+};
+
+const navItems: NavItem[] = [
+  {
+    path: "/anuncios",
+    name: "Anúncios",
+  },
+  {
+    path: "/documentos",
+    name: "Documentos",
+  },
+  {
+    path: "/noticias",
+    name: "Notícias",
+  },
+  {
+    path: "/mensagens",
+    name: "Mensagens",
+    authenticated: true,
+  },
 ];
 
 const authButtonClasses = "border border-gray-200 rounded-sm mr-2";
@@ -19,7 +36,7 @@ export default function Navbar() {
   const location = useLocation();
 
   const selectedItem = useMemo(
-    () => navItems.findIndex(([path]) => location.pathname.startsWith(path)),
+    () => navItems.findIndex(({ path }) => location.pathname.startsWith(path)),
     [location]
   );
 
@@ -27,18 +44,21 @@ export default function Navbar() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between h-16 text-white bg-blue-500">
         <ul className="flex h-full al">
-          {navItems.map(([href, label], index) => (
-            <li
-              key={href}
-              className={`flex justify-center align-middle hover:bg-blue-600 ${
-                selectedItem === index ? "bg-blue-400 " : ""
-              }`}
-            >
-              <Link to={href} className="px-6 py-4 text-lg ">
-                {label}
-              </Link>
-            </li>
-          ))}
+          {navItems.map(
+            ({ path, name, authenticated }, index) =>
+              (!authenticated || user) && (
+                <li
+                  key={path}
+                  className={`flex justify-center align-middle hover:bg-blue-600 ${
+                    selectedItem === index ? "bg-blue-400 " : ""
+                  }`}
+                >
+                  <Link to={path} className="px-6 py-4 text-lg ">
+                    {name}
+                  </Link>
+                </li>
+              )
+          )}
         </ul>
         {user ? (
           <Form

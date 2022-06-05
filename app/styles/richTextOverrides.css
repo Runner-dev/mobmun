@@ -1,0 +1,6 @@
+.ql-container {
+  @apply font-serif;
+}
+.rdw-image-modal-upload-option-label {
+  @apply my-3 max-h-[120px] max-w-full overflow-clip overflow-ellipsis [overflow-wrap:anywhere];
+}

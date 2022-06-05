@@ -7,7 +7,7 @@ export default function NewYorkTimes() {
 
   return (
     <div className="min-h-screen font-serif bg-gray-50">
-      <nav className="fixed top-0 flex items-center justify-between w-full h-20 border-b shadow-md border-b-black">
+      <nav className="fixed top-0 z-50 flex items-center justify-between w-full h-20 border-b shadow-md border-b-black bg-gray-50">
         <Link
           to={indexPage ? "/noticias/" : "/noticias/new-york-times/"}
           className="flex items-center justify-center h-full px-8 hover:bg-gray-200"

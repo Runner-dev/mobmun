@@ -12,8 +12,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   const session = await sessionStorage.getSession(
     request.headers.get("cookie")
   );
-  let authToken = session.get("authToken");
-  if (authToken) return redirect(safeRedirect(redirectTo));
+  let sessionData = session.get("authToken");
+
+  if (sessionData && sessionData.token && sessionData.expiry - Date.now() > 0)
+    return redirect(safeRedirect(redirectTo));
 
   const currentUser = await authenticator.isAuthenticated(request, {
     failureRedirect: "/auth/google",
@@ -37,12 +39,21 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
   const response = await result.json();
 
-  if (!response || !response.access_token) {
+  console.log(response);
+
+  if (!response || !response.access_token || !response.expires_in) {
     console.error("Google Acess token error");
     throw new Response("Error", { status: 500 });
   }
 
-  session.set("authToken", response.access_token);
+  const expiryDate = new Date();
+
+  expiryDate.setSeconds(expiryDate.getSeconds() + response.expires_in);
+
+  session.set("authToken", {
+    token: response.access_token,
+    expiry: expiryDate.getTime(),
+  });
 
   return redirect(safeRedirect(redirectTo), {
     headers: {

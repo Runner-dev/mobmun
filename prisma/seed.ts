@@ -78,7 +78,7 @@ async function seed() {
           id,
           email,
           displayName,
-          Representative: {
+          representative: {
             create: {
               name: representativeName,
               country: { connect: { id: countryId } },

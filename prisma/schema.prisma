@@ -16,7 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   googleRefreshToken GoogleRefreshToken?
-  Representative     Representative?
+  representative     Representative?
 }
 
 model GoogleRefreshToken {
@@ -35,7 +35,9 @@ model Country {
   Alliance   Alliance? @relation(fields: [allianceId], references: [id])
   allianceId String?
 
-  SharingCountries SharingCountry[]
+  sharingsReceived SharingCountry[]
+  sharingsOwned    Sharing[]
+  signatures       Signature[]
 }
 
 model Representative {
@@ -80,11 +82,21 @@ model Article {
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  name      String
-  uploaded  Boolean  @default(false)
-  sharingId String   @unique
-  sharing   Sharing? @relation(fields: [sharingId], references: [id])
+  id         String      @id @default(cuid())
+  name       String
+  uploaded   Boolean     @default(false)
+  sharingId  String      @unique
+  sharing    Sharing     @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  signatures Signature[]
+}
+
+model Signature {
+  id         String   @id @default(cuid())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  documentId String
+
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  countryId String
 }
 
 model Sharing {
@@ -92,16 +104,17 @@ model Sharing {
   document       Document?
   sharingCountry SharingCountry[]
   public         Boolean          @default(false)
-
-  alliance   Alliance? @relation(fields: [allianceId], references: [id])
-  allianceId String?
+  sharer         Country?         @relation(fields: [sharerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sharerId       String?
+  alliance       Alliance?        @relation(fields: [allianceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  allianceId     String?
 }
 
 model SharingCountry {
   id        String  @id @default(cuid())
   countryId String
-  country   Country @relation(fields: [countryId], references: [id])
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   sharingId String
-  sharing   Sharing @relation(fields: [sharingId], references: [id])
+  sharing   Sharing @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

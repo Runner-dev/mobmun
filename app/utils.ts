@@ -1,4 +1,5 @@
 import { useMatches } from "@remix-run/react";
+import type { StorageReference } from "firebase/storage";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
@@ -89,4 +90,11 @@ export function useUser(): User {
 
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
+}
+
+export function getFirebaseUrl(reference: StorageReference) {
+  const bucket = reference.bucket;
+  const fullPath = encodeURIComponent(reference.fullPath);
+
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${fullPath}?alt=media`;
 }

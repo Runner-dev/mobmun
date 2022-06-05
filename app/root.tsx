@@ -13,15 +13,12 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { authenticator } from "./services/auth.server";
-import { sessionStorage } from "./services/session.server";
 
-import fontsStylesheetUrl from "./styles/font.css";
-import tailwindStylesheetUrl from "./styles/tailwind.css";
+import tailwindStylesheetUrl from "./compiledStyles/tailwind.css";
 import modalOverrideUrl from "./styles/modalOverride.css";
 
 export const links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: fontsStylesheetUrl },
     { rel: "stylesheet", href: tailwindStylesheetUrl },
     { rel: "stylesheet", href: modalOverrideUrl },
   ];
@@ -33,7 +30,7 @@ export const meta: MetaFunction = () => ({
   viewport: "width=device-width,initial-scale=1",
 });
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, context }) => {
   const user = await authenticator.isAuthenticated(request);
   return json({ user: user });
 };

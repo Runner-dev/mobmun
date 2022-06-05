@@ -1,6 +1,5 @@
-import { Link, Outlet } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 import Navbar from "~/components/Navbar";
-import { authenticator } from "~/services/auth.server";
 
 export default function Documentos() {
   return (

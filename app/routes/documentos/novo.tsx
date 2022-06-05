@@ -1,7 +1,8 @@
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import drive from "~/services/drive.server";
 import { useState } from "react";
-import { ActionFunction, Form, LoaderFunction, useLoaderData } from "remix";
+import type { ActionFunction, LoaderFunction } from "remix";
+import { Form, useLoaderData } from "remix";
 import { json, redirect } from "remix";
 import invariant from "tiny-invariant";
 import { v4 } from "uuid";
@@ -10,34 +11,58 @@ import { getAllianceByUser } from "~/models/alliance.server";
 import {
   createAllianceDocument,
   createPublicDocument,
+  createSpecificDocument,
 } from "~/models/document.server";
 import { authenticator } from "~/services/auth.server";
 import firebaseAdmin from "~/services/firebase.server";
 import { getAuthClient } from "~/services/googleAuth.server";
 import { sessionStorage } from "~/services/session.server";
-
+import type { Country } from "~/models/country.server";
+import {
+  getCountriesExceptOwn,
+  getCountriesOutsideAlliance,
+  getCountryByUser,
+} from "~/models/country.server";
+import SharingAutocomplete from "~/components/SharingAutocomplete";
 enum SharingType {
   Public = "public",
   Specific = "specific",
   Alliance = "alliance",
 }
 
+type LoaderData = {
+  token: string;
+  countries: Country[];
+  notInAlliance: Country[];
+};
+
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await sessionStorage.getSession(
     request.headers.get("cookie")
   );
-  const authToken = session.get("authToken");
+  const sessionData = session.get("authToken");
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/",
+  });
 
-  if (!authToken) return redirect("/auth/refresh?redirect=/documentos/novo");
+  if (!sessionData) return redirect("/auth/refresh?redirect=/documentos/novo");
 
-  return json({ token: authToken });
+  const { token, expiry } = sessionData;
+
+  if (!token || expiry - Date.now() < 0)
+    return redirect("/auth/refresh?redirect=/documentos/novo");
+
+  const countries = await getCountriesExceptOwn(user.id);
+  const notInAlliance = await getCountriesOutsideAlliance(user.id);
+
+  return json<LoaderData>({ token, countries, notInAlliance });
 };
 
 export const action: ActionFunction = async ({ request }) => {
   const session = await sessionStorage.getSession(
     request.headers.get("cookie")
   );
-  const authToken = session.get("authToken");
+  const { token } = session.get("authToken");
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/",
   });
@@ -51,12 +76,18 @@ export const action: ActionFunction = async ({ request }) => {
   invariant(typeof fileName === "string", "fileName is required");
   const id = v4();
 
-  if (!authToken) return redirect("/auth/refresh?redirect=/");
+  if (!token) return redirect("/auth/refresh?redirect=/");
   await Promise.all([
     (async () => {
+      const userCountry = await getCountryByUser(user.id);
+      invariant(userCountry, "user is not in a country");
       switch (sharingType) {
         case SharingType.Public:
-          await createPublicDocument({ fileId: id, name: fileName });
+          await createPublicDocument({
+            fileId: id,
+            name: fileName,
+            countryId: userCountry.id,
+          });
           break;
         case SharingType.Alliance:
           const userAlliance = await getAllianceByUser(user.id);
@@ -65,15 +96,30 @@ export const action: ActionFunction = async ({ request }) => {
             allianceId: userAlliance.id,
             fileId: id,
             name: fileName,
+            countryId: userCountry.id,
+          });
+          break;
+        case SharingType.Specific:
+          const chosenCountries = formData.get("sharingCountries");
+          invariant(
+            typeof chosenCountries === "string",
+            "chosenCountries is required"
+          );
+          const chosenCountriesArray =
+            chosenCountries !== "" ? chosenCountries.split(",") : [];
+          await createSpecificDocument({
+            sharedWith: chosenCountriesArray,
+            fileId: id,
+            name: fileName,
+            countryId: userCountry.id,
           });
           break;
       }
     })(),
     (async () => {
-      const googleAuth = getAuthClient(authToken);
+      const googleAuth = getAuthClient(token);
 
-      invariant(typeof authToken === "string");
-      invariant(typeof fileId === "string");
+      invariant(typeof fileId === "string", "fileId is required");
       const writeStream = await firebaseAdmin
         .storage()
         .bucket()
@@ -95,13 +141,18 @@ export const action: ActionFunction = async ({ request }) => {
           .on("error", reject);
       });
     })(),
-  ]);
+  ]).catch(async (err) => {
+    throw err;
+  });
 
   return redirect(`/documentos/${id}`);
 };
 
 export default function CreateDocument() {
-  const { token } = useLoaderData();
+  const { token, countries, notInAlliance } = useLoaderData() as LoaderData;
+  console.log(notInAlliance);
+  console.log(countries);
+
   const [sharingType, setSharingType] = useState("specific");
 
   return (
@@ -126,6 +177,14 @@ export default function CreateDocument() {
           <MenuItem value={SharingType.Specific}>Nações Específicas</MenuItem>
         </Select>
       </FormControl>
+      {sharingType !== SharingType.Public && (
+        <SharingAutocomplete
+          countries={
+            sharingType === SharingType.Alliance ? notInAlliance : countries
+          }
+          extra={sharingType === SharingType.Alliance}
+        />
+      )}
       <button className="py-4 text-white bg-blue-500 rounded">
         Criar Documento
       </button>
