@@ -9,17 +9,20 @@ async function seed() {
   await prisma.country.deleteMany();
   await prisma.alliance.deleteMany();
   await prisma.googleRefreshToken.deleteMany();
-  await prisma.representative.deleteMany();
+  await prisma.countryRepresentative.deleteMany();
+  await prisma.newsOrgRepresentative.deleteMany();
 
   // Announcements
 
   const announcements: Array<{
     content: string;
     fictionalDate: Date;
+    fictionalDateStr: string;
   }> = [
     {
       content: "São Paulo é capturada por inconfidentes",
       fictionalDate: new Date("1932-02-17"),
+      fictionalDateStr: "17/02/1932",
     },
   ];
 
@@ -78,7 +81,7 @@ async function seed() {
           id,
           email,
           displayName,
-          representative: {
+          countryRepresentative: {
             create: {
               name: representativeName,
               country: { connect: { id: countryId } },

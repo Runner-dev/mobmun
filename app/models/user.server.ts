@@ -55,3 +55,69 @@ export async function createUser({
 export async function deleteUserByEmail(email: User["email"]) {
   return prisma.user.delete({ where: { email } });
 }
+
+export async function getUsers() {
+  return prisma.user.findMany();
+}
+
+export async function getUsersWithoutRepresentatives() {
+  return prisma.user.findMany({
+    where: {
+      countryRepresentative: { is: null },
+    },
+  });
+}
+
+export async function createUserByMediator({
+  email,
+  displayName,
+}: {
+  email: string;
+  displayName: string;
+}) {
+  return prisma.user.create({
+    data: {
+      email,
+      displayName,
+    },
+  });
+}
+
+export async function getUserByIdWithIncludes(id: User["id"]) {
+  return prisma.user.findUnique({
+    where: { id },
+    include: {
+      countryRepresentative: {
+        include: {
+          country: true,
+        },
+      },
+      newsRepresentative: { include: { newsOrg: true } },
+    },
+  });
+}
+
+export async function updateUser({
+  id,
+  displayName,
+  email,
+  mediator,
+}: {
+  id: string;
+  displayName: string;
+  email: string;
+  mediator: boolean;
+}) {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      displayName,
+      email,
+      mediator,
+    },
+  });
+}
+
+export async function deleteUser(id: string) {
+  return prisma.user.delete({ where: { id } });
+}

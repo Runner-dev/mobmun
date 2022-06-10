@@ -22,15 +22,12 @@ export default function Announcements() {
       <main className="flex-col bg-white sm:flex sm:items-center">
         <h1 className="my-8 text-4xl font-medium">Anúncios</h1>
         <ol>
-          {announcements.map((announcement) => {
-            const fictionalDate = new Date(announcement.fictionalDate);
-            return (
-              <li key={announcement.id} className="text-2xl uppercase">
-                {fictionalDate.toLocaleDateString("en-GB")} -&nbsp;
-                {announcement.content}
-              </li>
-            );
-          })}
+          {announcements.map((announcement) => (
+            <li key={announcement.id} className="text-2xl uppercase">
+              {announcement.fictionalDateStr} -&nbsp;
+              {announcement.content}
+            </li>
+          ))}
         </ol>
       </main>
     </>

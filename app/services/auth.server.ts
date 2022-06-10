@@ -19,7 +19,7 @@ let googleStrategy = new GoogleStrategy<User>(
     accessType: "offline",
     prompt: "consent",
     scope:
-      " https://www.googleapis.com/auth/drive.readonly  https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/drive.file  https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
   },
   async ({ accessToken, refreshToken, extraParams, profile }) => {
     console.log(extraParams.scope);
@@ -33,3 +33,15 @@ let googleStrategy = new GoogleStrategy<User>(
 );
 
 authenticator.use(googleStrategy);
+
+export async function mediatorGuard(
+  request: Request,
+  failureUrl: string = "/"
+) {
+  const user = authenticator.isAuthenticated(request, {
+    failureRedirect: failureUrl,
+  });
+  if (!user) throw redirect(failureUrl);
+  if (!(await user).mediator) throw redirect(failureUrl);
+  return user;
+}

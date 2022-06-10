@@ -1,5 +1,6 @@
 import { useMatches } from "@remix-run/react";
 import type { StorageReference } from "firebase/storage";
+import { createResponseComposition } from "msw";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
@@ -97,4 +98,20 @@ export function getFirebaseUrl(reference: StorageReference) {
   const fullPath = encodeURIComponent(reference.fullPath);
 
   return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${fullPath}?alt=media`;
+}
+
+export function getDateFromInternationalString(
+  dateString: string
+): Date | undefined {
+  const pattern = /(\d{2})\/(\d{2})\/(\d{4})/;
+  console.log(dateString.replace(pattern, "$3-$2-$1"));
+
+  const date = new Date(dateString.replace(pattern, "$3-$2-$1"));
+
+  console.log(date.getDate());
+
+  if (isNaN(date.getTime())) {
+    return undefined;
+  }
+  return new Date(date.getTime() + 1000 * 60 * 60);
 }

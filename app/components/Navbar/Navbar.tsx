@@ -5,7 +5,7 @@ import { useOptionalUser } from "~/utils";
 type NavItem = {
   path: string;
   name: string;
-  authenticated?: boolean;
+  guard?: (user: ReturnType<typeof useOptionalUser>) => boolean;
 };
 
 const navItems: NavItem[] = [
@@ -24,8 +24,9 @@ const navItems: NavItem[] = [
   {
     path: "/mensagens",
     name: "Mensagens",
-    authenticated: true,
+    guard: (user) => !!user,
   },
+  { path: "/mesa", name: "Mesa", guard: (user) => user?.mediator || false },
 ];
 
 const authButtonClasses = "border border-gray-200 rounded-sm mr-2";
@@ -45,8 +46,8 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between h-16 text-white bg-blue-500">
         <ul className="flex h-full al">
           {navItems.map(
-            ({ path, name, authenticated }, index) =>
-              (!authenticated || user) && (
+            ({ path, name, guard }, index) =>
+              (guard ? guard(user) : true) && (
                 <li
                   key={path}
                   className={`flex justify-center align-middle hover:bg-blue-600 ${

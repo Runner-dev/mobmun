@@ -1,24 +1,36 @@
 import type { LoaderFunction } from "remix";
 import { json, Link, useLoaderData } from "remix";
 import { getDocuments, getPublicDocuments } from "~/models/document.server";
+import {
+  getRepresentativeByUserId,
+  getRepresentativeByUserIdWithOrg,
+  isNewsRepresentative,
+} from "~/models/representative.server";
 import { authenticator } from "~/services/auth.server";
 
 interface LoaderData {
   documents: { id: string; name: string }[];
-  authenticated: boolean;
+  allowedToCreateDocument: boolean;
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request);
-  const documents = user
-    ? await getDocuments(user.id)
-    : await getPublicDocuments();
+  if (user) {
+    const rep = await getRepresentativeByUserId(user.id);
+    if (!isNewsRepresentative(rep)) {
+      const documents = await getDocuments(user.id);
 
-  return json<LoaderData>({ documents, authenticated: !!user });
+      return json<LoaderData>({ documents, allowedToCreateDocument: true });
+    }
+  }
+  return json<LoaderData>({
+    documents: await getPublicDocuments(),
+    allowedToCreateDocument: false,
+  });
 };
 
 export default function DocumentsList() {
-  const { documents, authenticated } = useLoaderData() as LoaderData;
+  const { documents, allowedToCreateDocument } = useLoaderData() as LoaderData;
 
   return documents.length ? (
     <>
@@ -33,7 +45,7 @@ export default function DocumentsList() {
           </Link>
         ))}
       </div>
-      {authenticated && (
+      {allowedToCreateDocument && (
         <Link
           to="novo"
           className="fixed bottom-4 right-4 aspect-square h-12 w-12 rounded-full bg-blue-500 text-center text-4xl leading-[2.75rem] text-white shadow-md transition-colors hover:bg-blue-600 focus:shadow-2xl"
@@ -45,7 +57,7 @@ export default function DocumentsList() {
   ) : (
     <div className="flex flex-col items-center max-w-screen-md gap-2 mx-auto mt-8">
       <h2 className="text-center">Você não tem documentos</h2>
-      {authenticated && (
+      {allowedToCreateDocument && (
         <Link
           to="novo"
           className="p-2 text-center text-white bg-blue-500 rounded-lg w-max"

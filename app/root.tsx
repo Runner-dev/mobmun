@@ -16,6 +16,12 @@ import { authenticator } from "./services/auth.server";
 
 import tailwindStylesheetUrl from "./compiledStyles/tailwind.css";
 import modalOverrideUrl from "./styles/modalOverride.css";
+import { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { connect } from "./sockets/client";
+import { socketContext } from "./sockets/context";
+import { useOptionalUser } from "./utils";
 
 export const links: LinksFunction = () => {
   return [
@@ -36,6 +42,25 @@ export const loader: LoaderFunction = async ({ request, context }) => {
 };
 
 export default function App() {
+  const [socket, setSocket] =
+    useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
+
+  const user = useOptionalUser();
+
+  useEffect(() => {
+    const connection = connect();
+    setSocket(connection);
+    return () => {
+      connection.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("sent");
+    if (user) socket?.send("user", user.id);
+    else socket?.send("noUser");
+  }, [socket, user]);
+
   return (
     <html lang="en" className="h-full">
       <head>
@@ -43,7 +68,9 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        <Outlet />
+        <socketContext.Provider value={socket}>
+          <Outlet />
+        </socketContext.Provider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
