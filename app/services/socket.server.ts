@@ -1,5 +1,6 @@
 import { getConversationMembersWithUsers } from "~/models/conversation.server";
-import { FormattedMessage, getMessageForSocket } from "~/models/message.server";
+import type { FormattedMessage } from "~/models/message.server";
+import { getMessageForSocket } from "~/models/message.server";
 
 export async function sendMessageToUsers({
   messageId,
@@ -29,13 +30,6 @@ export async function sendMessageToUsers({
 
   const message: FormattedMessage | null = await getMessageForSocket(messageId);
 
-  console.log(
-    JSON.stringify({
-      users,
-      conversationId,
-      message,
-    })
-  );
   await fetch("http://localhost:3000/socket/sendMessage", {
     method: "POST",
     body: JSON.stringify({

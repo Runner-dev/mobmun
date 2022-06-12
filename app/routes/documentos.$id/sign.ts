@@ -2,7 +2,7 @@ import type { ActionFunction } from "remix";
 import { redirect } from "remix";
 import invariant from "tiny-invariant";
 import { getCountryByUser } from "~/models/country.server";
-import { createSignature } from "~/models/signatures.server";
+import { createSignature } from "~/models/signature.server";
 import { authenticator } from "~/services/auth.server";
 
 export const action: ActionFunction = async ({ request, params }) => {

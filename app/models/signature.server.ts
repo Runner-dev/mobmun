@@ -25,3 +25,10 @@ export function createSignature({
     },
   });
 }
+
+export function deleteSignature(id: string) {
+  return prisma.signature.delete({
+    where: { id },
+    select: { documentId: true },
+  });
+}

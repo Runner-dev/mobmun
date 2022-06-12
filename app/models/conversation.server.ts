@@ -58,3 +58,25 @@ export async function getConversationMembersWithUsers(conversationId: string) {
 
   return { countryMembers, newsMembers };
 }
+
+export async function createConversation({
+  name,
+  countries,
+  newsOrgs,
+}: {
+  name: string;
+  countries: string[];
+  newsOrgs: string[];
+}) {
+  return prisma.conversation.create({
+    data: {
+      name,
+      countryMembers: {
+        create: countries.map((country) => ({ countryId: country })),
+      },
+      newsOrgMembers: {
+        create: newsOrgs.map((newsOrg) => ({ newsOrgId: newsOrg })),
+      },
+    },
+  });
+}

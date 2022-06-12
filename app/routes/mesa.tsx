@@ -22,6 +22,10 @@ const routes = [
     name: "Representantes",
     path: "representantes",
   },
+  {
+    name: "Documentos",
+    path: "documentos",
+  },
 ];
 
 export default function MesaDash() {

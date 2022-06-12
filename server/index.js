@@ -21,6 +21,7 @@ app.use(json());
 
 app.post("/socket/sendMessage", (req, res) => {
   const body = req.body;
+  console.log(body.users);
   invariant(body.users && body.users.length > 0, "users must be defined");
   invariant(body.message, "message must be defined");
   const message = body.message;

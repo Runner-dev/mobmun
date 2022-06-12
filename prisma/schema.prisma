@@ -89,12 +89,13 @@ model Article {
 }
 
 model Document {
-  id         String      @id @default(cuid())
-  name       String
-  uploaded   Boolean     @default(false)
-  sharingId  String      @unique
-  sharing    Sharing     @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  signatures Signature[]
+  id             String      @id @default(cuid())
+  name           String
+  uploaded       Boolean     @default(false)
+  sharingId      String      @unique
+  sharing        Sharing     @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  signatures     Signature[]
+  approvalStatus Int         @default(-1)
 }
 
 model Signature {
@@ -104,6 +105,8 @@ model Signature {
 
   country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   countryId String
+
+  @@unique([documentId, countryId])
 }
 
 model Sharing {
@@ -124,6 +127,8 @@ model SharingCountry {
 
   sharingId String
   sharing   Sharing @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([countryId, sharingId])
 }
 
 model Conversation {

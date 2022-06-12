@@ -87,30 +87,53 @@ export async function getDocuments(userId: string) {
   return prisma.document.findMany({
     select: { id: true, name: true },
     where: {
-      sharing: {
-        OR: [
-          {
-            sharingCountry: {
-              some: { country: { representatives: { some: { userId } } } },
-            },
+      OR: [
+        {
+          approvalStatus: 1,
+          sharing: {
+            OR: [
+              {
+                sharingCountry: {
+                  some: { country: { representatives: { some: { userId } } } },
+                },
+              },
+              {
+                public: true,
+              },
+              {
+                alliance: {
+                  countries: {
+                    some: { representatives: { some: { userId } } },
+                  },
+                },
+              },
+              {
+                public: false,
+                allianceId: null,
+                sharer: { representatives: { some: { userId } } },
+              },
+            ],
           },
-          {
-            public: true,
-          },
-          {
-            alliance: {
-              countries: { some: { representatives: { some: { userId } } } },
-            },
-          },
-          {
-            public: false,
-            allianceId: null,
+        },
+        {
+          approvalStatus: 0,
+          sharing: {
             sharer: { representatives: { some: { userId } } },
           },
-        ],
-      },
+        },
+        {
+          approvalStatus: -1,
+          sharing: {
+            sharer: { representatives: { some: { userId } } },
+          },
+        },
+      ],
     },
   });
+}
+
+export async function getMediatorDocuments() {
+  return prisma.document.findMany({ orderBy: { approvalStatus: "asc" } });
 }
 
 export function getDocumentById(id: string) {
@@ -119,6 +142,69 @@ export function getDocumentById(id: string) {
   });
 }
 
+export function getMediatorDocumentById(id: string) {
+  return prisma.document.findUnique({
+    where: { id },
+    include: {
+      sharing: { include: { sharingCountry: { include: { country: true } } } },
+      signatures: { include: { country: true } },
+    },
+  });
+}
+
 export function deleteDocument(id: string) {
   return prisma.document.delete({ where: { id } });
+}
+
+export async function updateDocument({
+  id,
+  name,
+  approvalStatus,
+  allianceId,
+  sharingCountriesIds,
+  isPublic,
+  sharerId,
+}: {
+  id: string;
+  name: string;
+  approvalStatus: number;
+  allianceId: string | null;
+  sharingCountriesIds: string[];
+  isPublic: boolean;
+  sharerId: string;
+}) {
+  const currentSharing = await prisma.sharing.findFirst({
+    where: { document: { id } },
+  });
+  return prisma.document.update({
+    where: { id },
+
+    data: {
+      name,
+      approvalStatus,
+      sharing: {
+        update: {
+          allianceId,
+          public: isPublic,
+          sharerId,
+          sharingCountry: {
+            deleteMany: {
+              countryId: { notIn: sharingCountriesIds },
+            },
+            connectOrCreate: sharingCountriesIds.map((country) => ({
+              where: {
+                countryId_sharingId: {
+                  countryId: country,
+                  sharingId: currentSharing?.id || "",
+                },
+              },
+              create: {
+                countryId: country,
+              },
+            })),
+          },
+        },
+      },
+    },
+  });
 }

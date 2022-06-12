@@ -24,6 +24,7 @@ export default function DriveInput({
     openPicker({
       clientId: oauthClientId,
       developerKey: pickerApiKey,
+      appId: "558484171824",
       viewId: "DOCUMENTS",
       locale: "pt-BR",
       token: authToken,

@@ -6,7 +6,7 @@ import invariant from "tiny-invariant";
 import Navbar from "~/components/Navbar";
 import { getCountryByUser } from "~/models/country.server";
 import { getDocumentById } from "~/models/document.server";
-import { getDocumentSignatures } from "~/models/signatures.server";
+import { getDocumentSignatures } from "~/models/signature.server";
 import { authenticator } from "~/services/auth.server";
 import firebaseAdmin from "~/services/firebase.server";
 

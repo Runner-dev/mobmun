@@ -8,14 +8,23 @@ import { useState } from "react";
 export default function Tags({
   countries,
   extra,
+  defaultValue,
 }: {
   countries: Country[];
   extra: boolean;
+  defaultValue?: Country[];
 }) {
-  const [value, setValue] = useState<Country[]>([]);
+  const [value, setValue] = useState<Country[]>(defaultValue || []);
+  console.log(countries);
+  console.log(defaultValue);
   return (
     <>
       <Autocomplete
+        isOptionEqualToValue={(option, value) => {
+          console.log(option.id, value.id);
+          console.log(option.id == value.id);
+          return option.id == value.id;
+        }}
         multiple
         id="tags-outlined"
         autoHighlight
@@ -23,6 +32,7 @@ export default function Tags({
         getOptionLabel={(option) => option.name}
         filterSelectedOptions
         value={value}
+        fullWidth
         onChange={(e, newVal) => setValue(newVal)}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
@@ -31,7 +41,6 @@ export default function Tags({
               label={option.name}
               avatar={<Avatar src={option.flag} alt="Flag" />}
               {...getTagProps({ index })}
-              disabled={option.name === "Portugal"}
               key={option.id}
             />
           ))
