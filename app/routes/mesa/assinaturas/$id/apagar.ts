@@ -1,4 +1,5 @@
-import { ActionFunction, redirect } from "remix";
+import type { ActionFunction } from "remix";
+import { redirect } from "remix";
 import invariant from "tiny-invariant";
 import { deleteSignature } from "~/models/signature.server";
 import { mediatorGuard } from "~/services/auth.server";

@@ -21,3 +21,15 @@ export async function createArticle(
 ) {
   return prisma.article.create({ data: article });
 }
+
+export async function updateArticle(
+  article: Pick<
+    Article,
+    "slug" | "author" | "content" | "newsOrg" | "slug" | "title"
+  >
+) {
+  return prisma.article.update({
+    data: article,
+    where: { slug: article.slug },
+  });
+}

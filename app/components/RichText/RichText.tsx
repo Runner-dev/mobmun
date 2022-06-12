@@ -13,22 +13,26 @@ type Props = {
   value?: string;
   onChange?: (value: string) => void;
   className: string;
+  initialState?: RawDraftContentState;
 };
 
 export default function RichText({
   value = "",
   onChange = () => {},
   className,
+  initialState,
 }: Props) {
   invariant(typeof value === "string", "value must be a string");
   invariant(typeof onChange === "function", "onChange must be a function");
   const [isBrowser, setIsBrowser] = useState(false);
   const [RichEditor, setRichEditor] =
     useState<React.ClassicComponent<EditorProps> | null>(null);
-  const [editorContent, setEditorContent] = useState<RawDraftContentState>({
-    blocks: [],
-    entityMap: {},
-  });
+  const [editorContent, setEditorContent] = useState<RawDraftContentState>(
+    initialState ?? {
+      blocks: [],
+      entityMap: {},
+    }
+  );
 
   useEffect(() => {
     import("react-draft-wysiwyg").then((data) => {
@@ -36,8 +40,6 @@ export default function RichText({
       setIsBrowser(true);
     });
   }, []);
-
-  console.log(JSON.stringify(editorContent));
 
   if (isBrowser && !RichEditor) throw new Error("No Rich Editor");
 
@@ -58,10 +60,11 @@ export default function RichText({
             const ext = nameParts[nameParts.length - 1];
             const reference = ref(storage, `newsImages/${v4()}.${ext}`);
             await uploadBytes(reference, image);
-            // const downloadURL = await getDownloadURL(reference);
-            const url = getFirebaseUrl(reference);
-            return { data: { link: url } };
+            const downloadURL = await getDownloadURL(reference);
+            // const url = getFirebaseUrl(reference);
+            return { data: { link: downloadURL } };
           },
+          previewImage: true,
         },
       },
     }),

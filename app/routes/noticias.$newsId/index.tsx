@@ -1,6 +1,5 @@
 import { Link, useLoaderData } from "@remix-run/react";
 import { getArticlesByNewsOrg } from "~/models/article.server";
-import type { Article } from "~/models/article.server";
 import { json } from "@remix-run/server-runtime";
 
 type LoaderData = {
@@ -9,18 +8,18 @@ type LoaderData = {
 
 export const loader = async () => {
   return json<LoaderData>({
-    articles: await getArticlesByNewsOrg("new-york-times"),
+    articles: await getArticlesByNewsOrg("daily-mail"),
   });
 };
 
-export default function NewYorkTimesIndex() {
+export default function DailyMailIndex() {
   const { articles } = useLoaderData() as LoaderData;
   return (
     <main className="relative mx-auto min-h-[calc(100vh-5rem)] w-full max-w-screen-md bg-white pt-2 shadow sm:flex sm:justify-center">
       <ul className="w-full">
         {articles.map((article, i) => (
-          <>
-            <li key={article.slug}>
+          <div key={article.slug}>
+            <li>
               <Link
                 to={article.slug}
                 className="flex flex-col items-center w-full py-6 group hover:text-gray-700"
@@ -50,7 +49,7 @@ export default function NewYorkTimesIndex() {
               </Link>
             </li>
             {i < articles.length - 1 && <hr className="my-8" />}
-          </>
+          </div>
         ))}
       </ul>
     </main>
