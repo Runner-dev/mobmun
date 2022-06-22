@@ -11,17 +11,20 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "@remix-run/react";
 import { authenticator } from "./services/auth.server";
+import { Toaster } from "react-hot-toast";
 
 import tailwindStylesheetUrl from "./compiledStyles/tailwind.css";
 import modalOverrideUrl from "./styles/modalOverride.css";
 import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import type { Socket } from "socket.io-client";
+import type { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { connect } from "./sockets/client";
 import { socketContext } from "./sockets/context";
 import { useOptionalUser } from "./utils";
+import { unreadMessagesContext } from "./unreadMessagesContext";
 
 export const links: LinksFunction = () => {
   return [
@@ -32,7 +35,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "Remix Notes",
+  title: "Site do MobMun",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -45,6 +48,31 @@ export default function App() {
   const [socket, setSocket] =
     useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
 
+  const location = useLocation();
+
+  const [unreadMessages, setUnreadMessages] = useState(false);
+
+  useEffect(() => {
+    if (socket) {
+      const listener = (conversationId: string, message: any) => {
+        if (!location.pathname.includes("mensagens")) {
+          setUnreadMessages(true);
+        }
+      };
+      socket.on("message", listener);
+
+      return () => socket.off("message", listener);
+    }
+
+    return () => {};
+  }, [location.pathname, socket]);
+
+  useEffect(() => {
+    if (location.pathname.includes("mensagens") && unreadMessages) {
+      setUnreadMessages(false);
+    }
+  }, [location.pathname, unreadMessages]);
+
   const user = useOptionalUser();
 
   useEffect(() => {
@@ -56,7 +84,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    console.log("sent");
     if (user) socket?.send("user", user.id);
     else socket?.send("noUser");
   }, [socket, user]);
@@ -68,8 +95,11 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
+        <Toaster />
         <socketContext.Provider value={socket}>
-          <Outlet />
+          <unreadMessagesContext.Provider value={unreadMessages}>
+            <Outlet />
+          </unreadMessagesContext.Provider>
         </socketContext.Provider>
         <ScrollRestoration />
         <Scripts />

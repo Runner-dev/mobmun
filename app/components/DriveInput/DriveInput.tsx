@@ -6,15 +6,17 @@ import { oauthClientId, pickerApiKey } from "~/bowserConstants";
 export default function DriveInput({
   className,
   authToken,
+  noName = false,
 }: {
   className?: string;
   authToken: string;
+  noName?: boolean;
 }) {
   const [openPicker, data] = useDrivePicker();
   const fileId = useMemo(() => data?.docs[0]?.id, [data]) || "";
   const [nameValue, setNameValue] = useState(data?.docs[0].name || "");
 
-  console.log(nameValue);
+  console.log(data);
 
   useEffect(() => {
     setNameValue(data?.docs[0].name || "");
@@ -53,13 +55,15 @@ export default function DriveInput({
         )}
       </div>
       <input type="hidden" name="fileId" value={fileId} required />
-      <TextField
-        name="fileName"
-        label="Nome do arquivo"
-        required
-        value={nameValue}
-        onChange={(e) => setNameValue(e.target.value)}
-      />
+      {!noName && (
+        <TextField
+          name="fileName"
+          label="Nome do arquivo"
+          required
+          value={nameValue}
+          onChange={(e) => setNameValue(e.target.value)}
+        />
+      )}
     </>
   );
 }

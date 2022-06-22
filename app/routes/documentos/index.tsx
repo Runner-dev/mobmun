@@ -1,9 +1,9 @@
-import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { getDocuments, getPublicDocuments } from "~/models/document.server";
 import {
   getRepresentativeByUserId,
-  getRepresentativeByUserIdWithOrg,
   isNewsRepresentative,
 } from "~/models/representative.server";
 import { authenticator } from "~/services/auth.server";
@@ -34,7 +34,7 @@ export default function DocumentsList() {
 
   return documents.length ? (
     <>
-      <div className="grid max-w-screen-md grid-cols-5 gap-4 mx-auto mt-8">
+      <div className="mx-auto mt-8 grid max-w-[90vw] grid-cols-2 gap-4 sm:grid-cols-3 md:max-w-screen-md md:grid-cols-4 lg:grid-cols-5">
         {documents.map((document) => (
           <Link
             key={document.id}

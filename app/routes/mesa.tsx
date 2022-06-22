@@ -1,4 +1,4 @@
-import { Link, Outlet } from "remix";
+import { Link, Outlet } from "@remix-run/react";
 import Navbar from "~/components/Navbar";
 
 const routes = [
@@ -26,6 +26,10 @@ const routes = [
     name: "Documentos",
     path: "documentos",
   },
+  {
+    name: "Correios Elegantes",
+    path: "correios-elegantes",
+  },
 ];
 
 export default function MesaDash() {
@@ -33,7 +37,7 @@ export default function MesaDash() {
     <>
       <Navbar />
       <h1 className="p-4 text-3xl font-bold">Área da Mesa</h1>
-      <div className="flex gap-8 px-4 mx-auto ">
+      <div className="flex flex-col gap-8 px-4 mx-auto md:flex-row ">
         <div className="px-6 py-4 bg-gray-100">
           <h2 className="mb-2 text-xl font-semibold">Páginas</h2>
           <ul className="px-2 ml-2">

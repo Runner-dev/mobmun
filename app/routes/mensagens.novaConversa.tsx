@@ -1,32 +1,22 @@
-import { Button, TextField } from "@mui/material";
-import { Country } from "@prisma/client";
-import {
-  ActionFunction,
-  Form,
-  json,
-  LoaderFunction,
-  redirect,
-  useLoaderData,
-} from "remix";
+import { TextField } from "@mui/material";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { newsOrgImages } from "~/bowserConstants";
-import ConversationAutoComplete, {
-  Member,
-} from "~/components/ConversationAutocomplete/ConversationAutocomplete";
+import type { Member } from "~/components/ConversationAutocomplete/ConversationAutocomplete";
+import ConversationAutoComplete from "~/components/ConversationAutocomplete/ConversationAutocomplete";
 import Navbar from "~/components/Navbar";
-import SharingAutocomplete from "~/components/SharingAutocomplete";
 import {
   getNewsOrgByUser,
   getNewsOrgsExceptOwn,
-} from "~/models/ newsOrg.server";
+} from "~/models/newsOrg.server";
 import { createConversation } from "~/models/conversation.server";
 import {
-  getCountries,
   getCountriesExceptOwn,
   getCountryByUser,
 } from "~/models/country.server";
-import { authenticator, mediatorGuard } from "~/services/auth.server";
-import Conversation from "./mensagens/$id";
+import { authenticator } from "~/services/auth.server";
 
 type LoaderData = {
   possibleMembers: Member[];
@@ -115,9 +105,17 @@ export default function NewConversation() {
         <h1 className="text-2xl text-center">Nova Conversa</h1>
         <TextField name="name" label="Nome da conversa" required fullWidth />
         <ConversationAutoComplete members={possibleMembers} />
-        <button className="w-full p-4 text-xl text-white bg-green-500 rounded-lg">
-          Criar Conversa
-        </button>
+        <div className="flex gap-2">
+          <Link
+            to="/mensagens"
+            className="flex-1 w-0 px-4 py-2 text-xl text-center text-white bg-gray-500 rounded-lg"
+          >
+            Cancelar
+          </Link>
+          <button className="flex-1 w-0 px-4 py-2 text-xl text-white bg-green-500 rounded-lg">
+            Criar Conversa
+          </button>
+        </div>
       </Form>
     </>
   );

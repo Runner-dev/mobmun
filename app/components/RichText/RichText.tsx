@@ -5,7 +5,6 @@ import type { EditorProps } from "react-draft-wysiwyg";
 import { storage } from "~/firebase.client";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 } from "uuid";
-import { getFirebaseUrl } from "~/utils";
 
 export { default as richTextCssUrl } from "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 

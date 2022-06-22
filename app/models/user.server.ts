@@ -57,13 +57,20 @@ export async function deleteUserByEmail(email: User["email"]) {
 }
 
 export async function getUsers() {
-  return prisma.user.findMany();
+  return prisma.user.findMany({
+    orderBy: {
+      displayName: "asc",
+    },
+  });
 }
 
 export async function getUsersWithoutRepresentatives() {
   return prisma.user.findMany({
     where: {
       countryRepresentative: { is: null },
+    },
+    orderBy: {
+      displayName: "asc",
     },
   });
 }

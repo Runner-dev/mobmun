@@ -1,6 +1,8 @@
-import { Link, LoaderFunction, useLoaderData } from "remix";
-import { json } from "remix";
-import { getUsers, User } from "~/models/user.server";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
+import type { User } from "~/models/user.server";
+import { getUsers } from "~/models/user.server";
 
 type LoaderData = {
   users: User[];
@@ -14,7 +16,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function MediatorUsers() {
   const { users } = useLoaderData() as LoaderData;
-
   return (
     <>
       <ul className="px-2 ml-2 list-disc">

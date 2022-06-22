@@ -4,13 +4,16 @@ import type {
   NewsOrg,
   NewsOrgRepresentative,
 } from "@prisma/client";
-import { ActionFunction, LoaderFunction, redirect } from "remix";
-import { Form, json, Link, useLoaderData } from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { StyledCheckbox, StyledInput } from "~/components/StyledInputs";
-import { deleteUser, updateUser, User } from "~/models/user.server";
+import type { User } from "~/models/user.server";
+import { deleteUser, updateUser } from "~/models/user.server";
 import { getUserByIdWithIncludes } from "~/models/user.server";
 import { mediatorGuard } from "~/services/auth.server";
+import useUpdating from "~/useUpdating";
 
 type LoaderData = {
   user:
@@ -69,6 +72,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export default function MediatorUser() {
   const { user } = useLoaderData() as LoaderData;
+
+  useUpdating();
 
   return (
     <Form method="post" className="flex w-full max-w-[400px] flex-col gap-2">

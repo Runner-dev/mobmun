@@ -40,6 +40,18 @@ export function isNewsRepresentative(obj: any): obj is NewsOrgRepresentative {
   return obj && typeof obj.newsOrgId !== "undefined";
 }
 
+export function isCountryRepresentative(
+  obj: any
+): obj is CountryRepresentative {
+  return obj && typeof obj.countryId !== "undefined";
+}
+
+export function getAvailableRepresentatives(countryId: string) {
+  return prisma.countryRepresentative.findMany({
+    where: { countryId, userId: null },
+  });
+}
+
 export function formatRepresentative(rep: {
   countryAuthor:
     | (CountryRepresentative & {
@@ -77,6 +89,9 @@ export type FormattedRepresentative = {
 export function getCountryRepresentatives() {
   return prisma.countryRepresentative.findMany({
     include: { country: true },
+    orderBy: {
+      countryId: "asc",
+    },
   });
 }
 
@@ -93,9 +108,9 @@ export function updateRepresentative({
   countryId,
   id,
 }: {
-  name: string;
-  userId: string;
-  countryId: string;
+  name?: string;
+  userId?: string | null;
+  countryId?: string;
   id: string;
 }) {
   return prisma.countryRepresentative.update({
@@ -104,6 +119,21 @@ export function updateRepresentative({
       name,
       userId,
       countryId,
+    },
+  });
+}
+
+export function updateNewsRepresentative({
+  id,
+  newsOrgId,
+}: {
+  id: string;
+  newsOrgId: string;
+}) {
+  return prisma.newsOrgRepresentative.update({
+    where: { id },
+    data: {
+      newsOrgId,
     },
   });
 }
@@ -128,6 +158,21 @@ export function createRepresentative({
       name,
       userId,
       countryId,
+    },
+  });
+}
+
+export function createNewsRepresentative({
+  newsOrgId,
+  userId,
+}: {
+  newsOrgId: string;
+  userId: string;
+}) {
+  return prisma.newsOrgRepresentative.create({
+    data: {
+      newsOrgId,
+      userId,
     },
   });
 }

@@ -73,4 +73,5 @@ export type FormattedMessage = {
   text: string;
   id: string;
   author: FormattedRepresentative;
+  createdAt: Date;
 };

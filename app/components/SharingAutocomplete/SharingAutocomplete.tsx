@@ -15,16 +15,11 @@ export default function Tags({
   defaultValue?: Country[];
 }) {
   const [value, setValue] = useState<Country[]>(defaultValue || []);
-  console.log(countries);
-  console.log(defaultValue);
+
   return (
     <>
       <Autocomplete
-        isOptionEqualToValue={(option, value) => {
-          console.log(option.id, value.id);
-          console.log(option.id == value.id);
-          return option.id == value.id;
-        }}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         multiple
         id="tags-outlined"
         autoHighlight

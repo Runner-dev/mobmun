@@ -1,16 +1,10 @@
-import {
-  ActionFunction,
-  Form,
-  json,
-  Link,
-  LoaderFunction,
-  redirect,
-  useLoaderData,
-} from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
-import { StyledInput, StyledSelect } from "~/components/StyledInputs";
-import { Country, getCountries } from "~/models/country.server";
-import { getDocumentById } from "~/models/document.server";
+import { StyledSelect } from "~/components/StyledInputs";
+import type { Country } from "~/models/country.server";
+import { getCountries } from "~/models/country.server";
 import { createSignature } from "~/models/signature.server";
 import { mediatorGuard } from "~/services/auth.server";
 

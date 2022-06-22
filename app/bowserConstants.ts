@@ -3,7 +3,6 @@ export const oauthClientId =
 export const pickerApiKey = "AIzaSyBwOArsU02gZl_WlPwgKyZxg4MtH4QotiI";
 export const socketUrl = null;
 export const newsOrgImages = {
-  "kolnische-zeitung":
-    "http://localhost:3000/images/kolnische-zeitung/square.jpg",
-  "daily-mail": "http://localhost:3000/images/daily-mail/square.jpg",
+  "kolnische-zeitung": "/images/kolnische-zeitung/square.jpg",
+  "daily-mail": "/images/daily-mail/square.jpg",
 };

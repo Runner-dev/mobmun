@@ -1,13 +1,19 @@
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, Link, redirect, useLoaderData } from "remix";
-import invariant from "tiny-invariant";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import {
-  Announcement,
+  ActionFunction,
+  json,
+  LoaderFunction,
+  redirect,
+} from "@remix-run/server-runtime";
+import invariant from "tiny-invariant";
+import type { Announcement } from "~/models/announcement.server";
+import {
   deleteAnnouncement,
   updateAnnouncement,
 } from "~/models/announcement.server";
 import { getAnnouncementById } from "~/models/announcement.server";
 import { mediatorGuard } from "~/services/auth.server";
+import useUpdating from "~/useUpdating";
 import { getDateFromInternationalString } from "~/utils";
 
 type LoaderData = {
@@ -42,7 +48,7 @@ export const action: ActionFunction = async ({ request }) => {
     const date = getDateFromInternationalString(dateStr);
     if (!date) return new Response("Invalid date", { status: 400 });
     await updateAnnouncement({ id, content, date, dateStr });
-    return redirect("/mesa/anuncios");
+    return json({});
   } else if (action === "delete") {
     const id = formData.get("id");
     invariant(typeof id === "string", "id must be a string");
@@ -54,6 +60,8 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function NewAnnouncement() {
   const { announcement } = useLoaderData() as LoaderData;
+
+  useUpdating();
 
   return (
     <Form method="post" className="flex w-full max-w-[400px] flex-col gap-2">

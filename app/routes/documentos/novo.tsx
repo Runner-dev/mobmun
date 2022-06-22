@@ -1,9 +1,6 @@
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import drive from "~/services/drive.server";
 import { useState } from "react";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, useLoaderData } from "remix";
-import { json, redirect } from "remix";
 import invariant from "tiny-invariant";
 import { v4 } from "uuid";
 import DriveInput from "~/components/DriveInput";
@@ -24,6 +21,9 @@ import {
   getCountryByUser,
 } from "~/models/country.server";
 import SharingAutocomplete from "~/components/SharingAutocomplete";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
+import { Form, useLoaderData, useTransition } from "@remix-run/react";
 enum SharingType {
   Public = "public",
   Specific = "specific",
@@ -150,8 +150,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function CreateDocument() {
   const { token, countries, notInAlliance } = useLoaderData() as LoaderData;
-  console.log(notInAlliance);
-  console.log(countries);
+  const transition = useTransition();
 
   const [sharingType, setSharingType] = useState("specific");
 
@@ -185,8 +184,11 @@ export default function CreateDocument() {
           extra={sharingType === SharingType.Alliance}
         />
       )}
-      <button className="py-4 text-white bg-blue-500 rounded">
-        Criar Documento
+      <button
+        disabled={transition.state === "submitting"}
+        className="py-4 text-white bg-blue-500 rounded"
+      >
+        {transition.state === "submitting" ? "Criando ..." : "Criar Documento"}
       </button>
     </Form>
   );

@@ -80,3 +80,58 @@ export async function createConversation({
     },
   });
 }
+
+export async function getConversationByIdWithMembers(conversationId: string) {
+  return prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: {
+      countryMembers: { include: { country: true } },
+      newsOrgMembers: { include: { newsOrg: true } },
+    },
+  });
+}
+
+export async function addMembersToConversation({
+  id,
+  newsOrgs,
+  countries,
+}: {
+  id: string;
+  newsOrgs: string[];
+  countries: string[];
+}) {
+  return prisma.conversation.update({
+    where: { id },
+    data: {
+      newsOrgMembers: {
+        create: newsOrgs.map((newsOrg) => ({ newsOrgId: newsOrg })),
+      },
+      countryMembers: {
+        create: countries.map((country) => ({ countryId: country })),
+      },
+    },
+  });
+}
+
+export async function leaveConversation({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) {
+  return Promise.all([
+    prisma.conversationCountryMember.deleteMany({
+      where: {
+        conversationId,
+        country: { representatives: { some: { userId } } },
+      },
+    }),
+    prisma.conversationNewsOrgMember.deleteMany({
+      where: {
+        conversationId,
+        newsOrg: { representatives: { some: { userId } } },
+      },
+    }),
+  ]);
+}

@@ -8,6 +8,9 @@ export function getDocumentSignatures(documentId: string) {
     include: {
       country: true,
     },
+    orderBy: {
+      createdAt: "asc",
+    },
   });
 }
 

@@ -1,6 +1,9 @@
-import { Alliance, Country } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, Link, redirect, useLoaderData } from "remix";
+import type { Alliance, Country } from "@prisma/client";
+import { Form, Link, useLoaderData, useTransition } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { StyledInput } from "~/components/StyledInputs";
 import {
@@ -9,6 +12,7 @@ import {
   updateAlliance,
 } from "~/models/alliance.server";
 import { mediatorGuard } from "~/services/auth.server";
+import useUpdating from "~/useUpdating";
 
 type LoaderData = {
   alliance: Alliance & {
@@ -40,6 +44,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     invariant(typeof name === "string", "name must be a string");
 
     await updateAlliance({ id, name });
+
     return json({});
   } else if (action === "delete") {
     await deleteAlliance(id);
@@ -50,6 +55,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NewAnnouncement() {
   const { alliance } = useLoaderData() as LoaderData;
+
+  useUpdating();
 
   return (
     <div className="flex w-full max-w-[400px] flex-col gap-2">

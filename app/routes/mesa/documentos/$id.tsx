@@ -1,33 +1,28 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import type {
   Country,
-  CountryRepresentative,
   Document,
   Sharing,
   SharingCountry,
   Signature,
-  User,
 } from "@prisma/client";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import { useState } from "react";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, Link, redirect, useLoaderData } from "remix";
 import invariant from "tiny-invariant";
 import SharingAutocomplete from "~/components/SharingAutocomplete";
 import { StyledInput, StyledSelect } from "~/components/StyledInputs";
-import {
-  getCountries,
-  getCountriesExceptOwn,
-  getCountryById,
-} from "~/models/country.server";
+import { getCountries, getCountryById } from "~/models/country.server";
 import {
   deleteDocument,
-  getDocumentById,
   getMediatorDocumentById,
   updateDocument,
 } from "~/models/document.server";
 
 import { mediatorGuard } from "~/services/auth.server";
 import firebaseAdmin from "~/services/firebase.server";
+import useUpdating from "~/useUpdating";
 
 enum SharingType {
   Public = "public",
@@ -85,13 +80,16 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (action === "update") {
     const name = formData.get("name");
     invariant(typeof name === "string", "name must be a string");
+
     const approvalStatus = formData.get("approvalStatus");
     invariant(
       typeof approvalStatus === "string",
       "approvalStatus must be a string"
     );
+
     const intApprovalStatus = parseInt(approvalStatus);
     invariant(!isNaN(intApprovalStatus), "approvalStatus must be a number");
+
     const sharerId = formData.get("sharerId");
     invariant(typeof sharerId === "string", "sharerId must be a string");
 
@@ -105,12 +103,16 @@ export const action: ActionFunction = async ({ request, params }) => {
       allianceId = sharerCountry?.allianceId ?? null;
     }
 
-    const sharingCountriesStr = formData.get("sharingCountries");
+    const sharingCountriesStr = formData.get("sharingCountries") ?? "";
     invariant(
       typeof sharingCountriesStr === "string",
       "sharingCountries must be a string"
     );
-    const sharingCountries = sharingCountriesStr.split(",");
+    const sharingCountries =
+      sharingCountriesStr === "" ? [] : sharingCountriesStr.split(",");
+
+    const comment = formData.get("comment");
+    invariant(typeof comment === "string");
 
     await updateDocument({
       id,
@@ -120,6 +122,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       sharingCountriesIds: sharingCountries.length > 0 ? sharingCountries : [],
       sharerId,
       isPublic,
+      mediatorComment: comment,
     });
 
     return json({});
@@ -131,7 +134,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   return new Response("Invalid action", { status: 400 });
 };
 
-export default function NewAnnouncement() {
+export default function Announcement() {
   const { document, docUrl, countries } = useLoaderData() as LoaderData;
   const [currentApprovalValue, setCurrentApprovalValue] = useState(
     document.approvalStatus.toString()
@@ -145,7 +148,7 @@ export default function NewAnnouncement() {
       : SharingType.Specific
   );
 
-  console.log(document.sharing.sharingCountry.map(({ country }) => country));
+  useUpdating();
 
   return (
     <div className="w-full max-w-[600px]">
@@ -183,6 +186,13 @@ export default function NewAnnouncement() {
               ? "bg-red-200"
               : "bg-green-200"
           }`}
+        />
+
+        <textarea
+          name="comment"
+          className="min-h-[2em] w-full p-2"
+          placeholder="Comentário"
+          defaultValue={document.mediatorComment}
         />
 
         <div className="flex flex-col items-start gap-4 p-2 bg-gray-100">

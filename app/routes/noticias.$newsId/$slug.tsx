@@ -1,13 +1,11 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import {
-  ActionFunction,
-  LoaderFunction,
-  redirect,
-} from "@remix-run/server-runtime";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { redirect } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import draftToHtml from "draftjs-to-html";
 import invariant from "tiny-invariant";
-import { Article, updateArticle } from "~/models/article.server";
+import type { Article } from "~/models/article.server";
+import { updateArticle } from "~/models/article.server";
 import { getArticleBySlug } from "~/models/article.server";
 import {
   getRepresentativeByUserIdWithOrg,
@@ -22,16 +20,22 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   invariant(typeof params.slug === "string", "slug must be a string");
+
   const article = await getArticleBySlug(params.slug);
   if (!article) throw new Response("Article Not Found", { status: 404 });
   const content = draftToHtml(JSON.parse(article.content));
 
   const { newsId } = params;
 
+  const formattedArticle = {
+    ...article,
+    content,
+  };
+
   const user = await authenticator.isAuthenticated(request);
-  if (!user) return json({ author: false });
+  if (!user)
+    return json<LoaderData>({ author: false, article: formattedArticle });
   const userRep = await getRepresentativeByUserIdWithOrg(user.id);
-  console.log(userRep);
   const author = !!(
     userRep &&
     isNewsRepresentative(userRep) &&
@@ -39,10 +43,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   );
 
   return json<LoaderData>({
-    article: {
-      ...article,
-      content,
-    },
+    article: formattedArticle,
     author,
   });
 };
@@ -74,7 +75,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NYTArticle() {
   const { article, author } = useLoaderData() as LoaderData;
-
   return (
     <main className="relative mx-auto  min-h-[calc(100vh-5rem)] w-full max-w-screen-md flex-col bg-white p-8 shadow">
       <h1 className="text-4xl font-bold text-justify max-w-prose">

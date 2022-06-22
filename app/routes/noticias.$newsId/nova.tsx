@@ -1,25 +1,13 @@
 import { TextField } from "@mui/material";
 import { useState } from "react";
-import {
-  ActionFunction,
-  Link,
-  LinksFunction,
-  LoaderFunction,
-  useLoaderData,
-} from "remix";
-import { redirect } from "remix";
-import { json } from "remix";
-import { Form } from "remix";
 import RichText, { richTextCssUrl } from "~/components/RichText";
 import richTextOverrides from "~/compiledStyles/richTextOverrides.css";
 import { createArticle } from "~/models/article.server";
 import invariant from "tiny-invariant";
 import { slugify, useUser } from "~/utils";
-import { authenticator } from "~/services/auth.server";
-import {
-  getRepresentativeByUserIdWithOrg,
-  isNewsRepresentative,
-} from "~/models/representative.server";
+import type { ActionFunction, LinksFunction } from "@remix-run/server-runtime";
+import { redirect } from "@remix-run/server-runtime";
+import { Form } from "@remix-run/react";
 
 export const links: LinksFunction = () => {
   return [

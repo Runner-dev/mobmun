@@ -1,6 +1,11 @@
 import { Alliance, Country } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, Link, redirect, useLoaderData } from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import {
+  ActionFunction,
+  json,
+  LoaderFunction,
+  redirect,
+} from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { StyledInput, StyledSelect } from "~/components/StyledInputs";
 import { getAlliances } from "~/models/alliance.server";
@@ -12,6 +17,7 @@ import {
 } from "~/models/country.server";
 
 import { mediatorGuard } from "~/services/auth.server";
+import useUpdating from "~/useUpdating";
 import { getDateFromInternationalString } from "~/utils";
 
 type LoaderData = {
@@ -66,9 +72,10 @@ export const action: ActionFunction = async ({ request, params }) => {
   return new Response("Invalid action", { status: 400 });
 };
 
-export default function NewAnnouncement() {
+export default function CountryComponent() {
   const { alliances, country } = useLoaderData() as LoaderData;
 
+  useUpdating();
   return (
     <div className="flex w-full max-w-[400px] flex-col gap-2">
       <Form method="post">

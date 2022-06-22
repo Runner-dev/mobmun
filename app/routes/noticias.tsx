@@ -9,9 +9,9 @@ export default function Noticias() {
   return (
     <>
       <Navbar />
-      <main className="h-[calc(100vh-4rem)] flex-col bg-gray-100 sm:flex sm:items-center">
-        <h1 className="my-8 text-5xl font-medium">Notícias</h1>
-        <div className="flex items-center justify-around w-full max-w-screen-md gap-16 p-8 ">
+      <main className="h-screen flex-col bg-gray-100 px-2 sm:flex sm:h-[calc(100vh-4rem)] sm:items-center">
+        <h1 className="py-8 text-5xl font-medium">Notícias</h1>
+        <div className="flex flex-col items-center justify-around w-full max-w-screen-sm gap-16 p-4 aspect-square sm:flex-row sm:p-8 ">
           <Link to="daily-mail" className={linkClasses}>
             <img
               src={`/images/daily-mail/square.jpg`}

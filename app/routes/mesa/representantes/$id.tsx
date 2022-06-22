@@ -1,6 +1,7 @@
 import type { Country, CountryRepresentative, User } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, Link, redirect, useLoaderData } from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { StyledInput, StyledSelect } from "~/components/StyledInputs";
 import { getCountries } from "~/models/country.server";
@@ -12,6 +13,7 @@ import {
 import { getUsersWithoutRepresentatives } from "~/models/user.server";
 
 import { mediatorGuard } from "~/services/auth.server";
+import useUpdating from "~/useUpdating";
 
 type LoaderData = {
   countries: Country[];
@@ -33,7 +35,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   return json<LoaderData>({
     countries,
-    users: [representative.user, ...users],
+    users: representative.user ? [representative.user, ...users] : users,
     representative,
   });
 };
@@ -58,7 +60,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     await updateRepresentative({
       id,
       name,
-      userId,
+      userId: userId === "noUser" ? null : userId,
       countryId,
     });
 
@@ -73,6 +75,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NewAnnouncement() {
   const { representative, countries, users } = useLoaderData() as LoaderData;
+
+  useUpdating();
 
   return (
     <div className="flex w-full max-w-[400px] flex-col gap-2">
@@ -98,14 +102,17 @@ export default function NewAnnouncement() {
           name="userId"
           label="Usuário"
           options={
-            users.length === 0
+            !users || users.length === 0
               ? [{ label: "Nenhum usuário sem representante", value: "noUser" }]
-              : users.map((user) => ({
-                  label: user.displayName,
-                  value: user.id,
-                }))
+              : [
+                  { label: "Sem Usuário", value: "noUser" },
+                  ...users.map((user) => ({
+                    label: user.displayName,
+                    value: user.id,
+                  })),
+                ]
           }
-          defaultSelection={representative.userId}
+          defaultSelection={representative.userId ?? undefined}
         />
 
         <div className="flex self-center gap-4 mt-2">
@@ -120,7 +127,7 @@ export default function NewAnnouncement() {
             value="delete"
             className="px-4 py-2 text-white bg-red-500 rounded-lg"
             onClick={(e) => {
-              if (!confirm("Deseja mesmo apagar essa aliança?"))
+              if (!confirm("Deseja mesmo apagar esse representante?"))
                 e.preventDefault();
             }}
           >

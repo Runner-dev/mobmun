@@ -1,6 +1,11 @@
 import type { Alliance } from "@prisma/client";
-import { ActionFunction, LoaderFunction, redirect } from "remix";
-import { Form, json, Link, useLoaderData } from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import {
+  ActionFunction,
+  json,
+  LoaderFunction,
+  redirect,
+} from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { StyledInput, StyledSelect } from "~/components/StyledInputs";
 import { getAlliances } from "~/models/alliance.server";

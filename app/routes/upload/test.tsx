@@ -1,11 +1,10 @@
 import { Form } from "@remix-run/react";
 import type { ActionFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
-import { createDocument, getDocuments } from "~/models/document.server";
+import { getDocuments } from "~/models/document.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const documents = await getDocuments("test2");
-  console.log(documents);
   return json({ ok: true });
 };
 

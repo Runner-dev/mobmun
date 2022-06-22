@@ -1,14 +1,14 @@
 import { TextField } from "@mui/material";
 import { useState } from "react";
-import type { LinksFunction, LoaderFunction } from "remix";
-import { Form, json, useLoaderData } from "remix";
 import invariant from "tiny-invariant";
 
 import RichText, { richTextCssUrl } from "~/components/RichText";
 import richTextOverrides from "~/compiledStyles/richTextOverrides.css";
 import { getArticleBySlug } from "~/models/article.server";
 import type { RawDraftContentState } from "react-draft-wysiwyg";
-import { Link, useParams } from "remix";
+import type { LinksFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
+import { Form, Link, useLoaderData, useParams } from "@remix-run/react";
 
 type LoaderData = {
   title: string;

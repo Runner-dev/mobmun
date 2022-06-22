@@ -7,6 +7,7 @@ export async function getArticlesByNewsOrg(newsOrg: string) {
   return prisma.article.findMany({
     where: { newsOrg },
     select: { slug: true, author: true, title: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 

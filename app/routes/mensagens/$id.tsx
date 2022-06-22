@@ -1,5 +1,3 @@
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, useLoaderData, useParams, useTransition } from "remix";
 import invariant from "tiny-invariant";
 import { getConversationByIdWithMessages } from "~/models/conversation.server";
 import type { Conversation as ConversationType, Message } from "@prisma/client";
@@ -17,6 +15,15 @@ import { socketContext } from "~/sockets/context";
 import { sendMessageToUsers } from "~/services/socket.server";
 import { v4 } from "uuid";
 import { newsOrgImages } from "~/bowserConstants";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
+import {
+  Form,
+  Link,
+  useLoaderData,
+  useParams,
+  useTransition,
+} from "@remix-run/react";
 
 type LoaderData = {
   conversationData: ConversationType & {
@@ -37,13 +44,13 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
   if (!conversationData)
     throw new Response("Conversa não encontrada", { status: 404 });
-
   const formattedMessages: (Message & {
     author: { name: string; imageAlt: string; imageSrc: string };
   })[] = conversationData.messages.map(formatMessage);
 
   const userRep = await getRepresentativeByUserIdWithOrg(user.id);
   if (!userRep) throw new Response("Rep not found", { status: 404 });
+
   const formattedRep: FormattedRepresentative = isNewsRepresentative(userRep)
     ? {
         name: userRep.user.displayName,
@@ -56,8 +63,6 @@ export const loader: LoaderFunction = async ({ params, request }) => {
         imageSrc: userRep.country.flag,
         imageAlt: `Bandeira ${userRep.country.name}`,
       };
-
-  if (!userRep) throw new Error("No Representative");
 
   return json<LoaderData>({
     conversationData: { ...conversationData, messages: formattedMessages },
@@ -86,7 +91,7 @@ export const action: ActionFunction = async ({ params, request }) => {
 
   const dbMessage = await createMessage({
     conversationId: id,
-    text: message,
+    text: message.trim(),
     countryAuthorId: isNewsRepresentative(representative)
       ? undefined
       : representative.id,
@@ -116,13 +121,27 @@ export default function Conversation() {
   const transition = useTransition();
   const isSending = transition.state === "submitting";
 
+  const scrollToBottomEl = useRef<HTMLDivElement>(null);
+
+  const scrolledRef = useRef(false);
+
+  useEffect(() => {
+    scrollToBottomEl.current?.scrollIntoView({
+      behavior: scrolledRef.current ? "smooth" : "auto",
+    });
+    scrolledRef.current = true;
+  }, [messages]);
+
   const socket = useContext(socketContext);
 
   useEffect(() => {
     if (socket) {
       const listener = (conversationId: string, message: any) => {
         if (conversationId === id)
-          setMessages((oldMessages) => [...oldMessages, message]);
+          setMessages((oldMessages) => [
+            ...oldMessages,
+            { ...message, createdAt: new Date() },
+          ]);
       };
       socket.on("message", listener);
 
@@ -141,16 +160,19 @@ export default function Conversation() {
       if (typeof text !== "string") return;
       setMessages((oldMessages) => [
         ...oldMessages,
-        { text, id: v4(), author: representativeData },
+        { text, id: v4(), author: representativeData, createdAt: new Date() },
       ]);
     }
   }, [isSending, representativeData, transition?.submission?.formData]);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center h-12 p-2 text-xl border-b bg-blue-300/40">
+      <Link
+        to="edit"
+        className="flex items-center h-12 p-2 text-xl border-b bg-blue-300/40 hover:text-blue-500 hover:underline"
+      >
         {conversationData.name}
-      </div>
+      </Link>
       <div className="h-full overflow-y-auto">
         {messages.map((message) => (
           <div key={message.id} className="flex items-start gap-4 p-4">
@@ -162,17 +184,27 @@ export default function Conversation() {
             <div className="flex flex-col items-start">
               <div className="text-sm font-semibold text-gray-700">
                 {message.author.name}
+                <span className="ml-4 text-gray-400">
+                  {new Date(message.createdAt).toLocaleString("en-GB")}
+                </span>
               </div>
               <div>{message.text}</div>
             </div>
           </div>
         ))}
+        <div className="h-0" ref={scrollToBottomEl}></div>
       </div>
       <div className="bg-blue-300/40">
         <Form
           method="post"
           className="flex justify-center max-w-screen-md gap-2 p-2 mx-auto h-14"
           ref={formRef}
+          onSubmit={(e) => {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const message = formData.get("message");
+            invariant(typeof message === "string");
+            if (message.trim() === "") return e.preventDefault();
+          }}
         >
           <input
             type="text"

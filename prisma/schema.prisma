@@ -1,195 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id          String @id @default(cuid())
-  displayName String
-  email       String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                    String                 @id @default(cuid())
+  displayName           String
+  email                 String                 @unique
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  initialCountryId      String?
+  initialNews           Boolean                @default(false)
+  mediator              Boolean                @default(false)
+  countryId             String?
+  initialCountry        Country?               @relation(fields: [countryId], references: [id])
   googleRefreshToken    GoogleRefreshToken?
-  countryRepresentative CountryRepresentative?
   newsRepresentative    NewsOrgRepresentative?
-
-  mediator Boolean @default(false)
+  countryRepresentative CountryRepresentative?
 }
 
 model GoogleRefreshToken {
   refreshToken String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Country {
-  id              String                  @id @default(cuid())
-  name            String
-  flag            String
-  representatives CountryRepresentative[]
-
-  Alliance   Alliance? @relation(fields: [allianceId], references: [id])
-  allianceId String?
-
-  sharingsReceived SharingCountry[]
-  sharingsOwned    Sharing[]
-  signatures       Signature[]
+  id               String                      @id @default(cuid())
+  name             String
+  flag             String
+  allianceId       String?
+  Alliance         Alliance?                   @relation(fields: [allianceId], references: [id])
   conversations    ConversationCountryMember[]
+  representatives  CountryRepresentative[]
+  sharingsOwned    Sharing[]
+  sharingsReceived SharingCountry[]
+  signatures       Signature[]
+  initialUsers     User[]
 }
 
 model CountryRepresentative {
-  id   String @id @default(cuid())
-  name String
+  id        String    @id @default(cuid())
+  name      String
+  countryId String
+  userId    String?   @unique
+  country   Country   @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  messages  Message[]
 
-  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  countryId String  @unique
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId   String    @unique
-  messages Message[]
   @@map("Representative")
 }
 
 model Alliance {
-  id   String @id @default(cuid())
-  name String
-
+  id        String    @id @default(cuid())
+  name      String
   countries Country[]
   sharings  Sharing[]
 }
 
 model Announcement {
-  id String @id @default(cuid())
-
+  id               String   @id @default(cuid())
   content          String
   fictionalDate    DateTime
   fictionalDateStr String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Article {
-
-  title   String
-  slug    String @id @unique
-  content String
-  author  String
-  newsOrg String
-
+  title     String
+  slug      String   @id @unique
+  content   String
+  author    String
+  newsOrg   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Document {
-  id             String      @id @default(cuid())
-  name           String
-  uploaded       Boolean     @default(false)
-  sharingId      String      @unique
-  sharing        Sharing     @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  signatures     Signature[]
-  approvalStatus Int         @default(-1)
+  id              String      @id @default(cuid())
+  name            String
+  uploaded        Boolean     @default(false)
+  sharingId       String      @unique
+  approvalStatus  Int         @default(-1)
+  sharing         Sharing     @relation(fields: [sharingId], references: [id], onDelete: Cascade)
+  signatures      Signature[]
+  mediatorComment String      @default("")
 }
 
 model Signature {
   id         String   @id @default(cuid())
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   documentId String
-
-  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  countryId String
+  countryId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  country    Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, countryId])
 }
 
 model Sharing {
   id             String           @id @default(cuid())
+  public         Boolean          @default(false)
+  sharerId       String?
+  allianceId     String?
+  alliance       Alliance?        @relation(fields: [allianceId], references: [id])
+  sharer         Country?         @relation(fields: [sharerId], references: [id])
   document       Document?
   sharingCountry SharingCountry[]
-  public         Boolean          @default(false)
-  sharer         Country?         @relation(fields: [sharerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  sharerId       String?
-  alliance       Alliance?        @relation(fields: [allianceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  allianceId     String?
 }
 
 model SharingCountry {
   id        String  @id @default(cuid())
   countryId String
-  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
   sharingId String
-  sharing   Sharing @relation(fields: [sharingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  sharing   Sharing @relation(fields: [sharingId], references: [id], onDelete: Cascade)
 
   @@unique([countryId, sharingId])
 }
 
 model Conversation {
-  id   String @id @default(cuid())
-  name String
-
+  id             String                      @id @default(cuid())
+  name           String
   countryMembers ConversationCountryMember[]
   newsOrgMembers ConversationNewsOrgMember[]
-
-  messages Message[]
+  messages       Message[]
 }
 
 model ConversationCountryMember {
-  id        String  @id @default(cuid())
-  countryId String
-  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  id             String        @id @default(cuid())
+  countryId      String
   conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  country        Country       @relation(fields: [countryId], references: [id], onDelete: Cascade)
 }
 
 model NewsOrg {
-  id   String @id @default(cuid())
-  name String
-
-  representatives            NewsOrgRepresentative[]
+  id                         String                      @id @default(cuid())
+  name                       String
   conversationNewsOrgMembers ConversationNewsOrgMember[]
+  representatives            NewsOrgRepresentative[]
 }
 
 model NewsOrgRepresentative {
-  id String @id @default(cuid())
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  id        String    @id @default(cuid())
+  userId    String    @unique
   newsOrgId String
-  newsOrg   NewsOrg @relation(fields: [newsOrgId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  messages Message[]
+  newsOrg   NewsOrg   @relation(fields: [newsOrgId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
 }
 
 model ConversationNewsOrgMember {
-  id String @id @default(cuid())
-
-  newsOrgId String
-  newsOrg   NewsOrg @relation(fields: [newsOrgId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  id             String        @id @default(cuid())
+  newsOrgId      String
   conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  newsOrg        NewsOrg       @relation(fields: [newsOrgId], references: [id], onDelete: Cascade)
+}
+
+model CorreiosElegantes {
+  id        String   @id @default(cuid())
+  mensagem  String
+  createdAt DateTime @default(now())
 }
 
 model Message {
-  id   String @id @default(cuid())
-  text String
-
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  id              String                 @id @default(cuid())
+  text            String
+  conversationId  String
   countryAuthorId String?
-  countryAuthor   CountryRepresentative? @relation(fields: [countryAuthorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
   newsOrgAuthorId String?
-  newsOrgAuthor   NewsOrgRepresentative? @relation(fields: [newsOrgAuthorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  conversation    Conversation           @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  countryAuthor   CountryRepresentative? @relation(fields: [countryAuthorId], references: [id], onDelete: Cascade)
+  newsOrgAuthor   NewsOrgRepresentative? @relation(fields: [newsOrgAuthorId], references: [id], onDelete: Cascade)
 }

@@ -60,8 +60,8 @@ export default function Mensagens() {
   return (
     <>
       <Navbar />
-      <div className="flex h-[calc(100vh-4rem)] w-full items-stretch">
-        <ul className="flex w-[300px] flex-initial flex-col items-stretch border-r bg-gray-50 shadow-xl">
+      <div className="flex h-screen w-full items-stretch lg:h-[calc(100vh-4rem)]">
+        <ul className="flex w-[300px] flex-initial flex-col items-stretch overflow-y-auto border-r bg-gray-50 shadow-xl">
           {conversations.map((conversation) => (
             <li
               key={conversation.id}
@@ -69,38 +69,38 @@ export default function Mensagens() {
             >
               <Link
                 to={conversation.id}
-                className="flex items-center justify-between flex-1 w-full p-4"
+                className="flex w-full flex-1 items-center justify-between p-4"
               >
                 <div>{conversation.name}</div>
                 {unreadConversations.some((id) => conversation.id === id) && (
-                  <div className="w-4 h-4 text-right rounded-full bg-blue-500/60">
+                  <div className="h-4 w-4 rounded-full bg-blue-500/60 text-right">
                     &nbsp;
                   </div>
                 )}
               </Link>
             </li>
           ))}
+          <Link
+            to={"novaConversa"}
+            className="fixed bottom-4 left-[calc(300px-4rem)] rounded-full bg-blue-500 p-2 text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
         </ul>
         <div className="flex-1 bg-white">
           <Outlet />
         </div>
-        <Link
-          to={"novaConversa"}
-          className="fixed p-2 text-white bg-blue-500 rounded-full bottom-4 right-4"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </Link>
       </div>
     </>
   );

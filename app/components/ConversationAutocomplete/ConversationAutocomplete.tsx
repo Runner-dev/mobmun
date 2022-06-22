@@ -11,7 +11,7 @@ export type Member = {
   type: "news" | "country";
 };
 
-export default function ConversationAutoomplete({
+export default function ConversationAutocomplete({
   members,
 }: {
   members: Member[];

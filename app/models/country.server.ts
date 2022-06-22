@@ -16,6 +16,12 @@ export async function getCountriesExceptOwn(userId: string) {
   });
 }
 
+export async function getCountriesOutsideConversation(conversationId: string) {
+  return prisma.country.findMany({
+    where: { conversations: { none: { conversationId } } },
+  });
+}
+
 export async function getCountriesOutsideAlliance(userId: string) {
   return prisma.country.findMany({
     where: {

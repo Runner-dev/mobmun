@@ -1,14 +1,18 @@
 import { Link, useLoaderData } from "@remix-run/react";
 import { getArticlesByNewsOrg } from "~/models/article.server";
+import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
+import invariant from "tiny-invariant";
 
 type LoaderData = {
   articles: { slug: string; author: string; title: string }[];
 };
 
-export const loader = async () => {
+export const loader: LoaderFunction = async ({ params }) => {
+  const { newsId } = params;
+  invariant(typeof newsId === "string", "newsId must be a string");
   return json<LoaderData>({
-    articles: await getArticlesByNewsOrg("daily-mail"),
+    articles: await getArticlesByNewsOrg(newsId),
   });
 };
 
@@ -25,7 +29,7 @@ export default function DailyMailIndex() {
                 className="flex flex-col items-center w-full py-6 group hover:text-gray-700"
               >
                 <div>
-                  <h2 className="w-[28ch] max-w-full text-left text-3xl font-bold group-hover:underline">
+                  <h2 className=" w-[28ch] max-w-[100vw] whitespace-normal px-2 text-left text-3xl font-bold group-hover:underline">
                     {article.title}
                   </h2>
                   <div className="flex items-center justify-start gap-2 px-2 py-1">

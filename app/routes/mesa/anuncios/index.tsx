@@ -1,5 +1,5 @@
-import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
+import { Link, useLoaderData } from "@remix-run/react";
+import { json, LoaderFunction } from "@remix-run/server-runtime";
 import type { Announcement } from "~/models/announcement.server";
 import { getAnnouncements } from "~/models/announcement.server";
 

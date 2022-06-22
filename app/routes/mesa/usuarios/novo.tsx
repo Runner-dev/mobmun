@@ -1,5 +1,5 @@
-import type { ActionFunction } from "remix";
-import { Form, Link, redirect } from "remix";
+import { Form, Link } from "@remix-run/react";
+import { ActionFunction, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { createUserByMediator } from "~/models/user.server";
 import { mediatorGuard } from "~/services/auth.server";

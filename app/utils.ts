@@ -18,8 +18,6 @@ export function safeRedirect(
   to: FormDataEntryValue | string | null | undefined,
   defaultRedirect: string = DEFAULT_REDIRECT
 ) {
-  console.log(to);
-
   if (!to || typeof to !== "string") {
     return defaultRedirect;
   }
@@ -104,11 +102,8 @@ export function getDateFromInternationalString(
   dateString: string
 ): Date | undefined {
   const pattern = /(\d{2})\/(\d{2})\/(\d{4})/;
-  console.log(dateString.replace(pattern, "$3-$2-$1"));
 
   const date = new Date(dateString.replace(pattern, "$3-$2-$1"));
-
-  console.log(date.getDate());
 
   if (isNaN(date.getTime())) {
     return undefined;

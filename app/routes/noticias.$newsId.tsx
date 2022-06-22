@@ -5,9 +5,9 @@ import {
   useMatches,
   useParams,
 } from "@remix-run/react";
-import { json, LoaderFunction } from "remix";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import {
-  getRepresentativeByUserId,
   getRepresentativeByUserIdWithOrg,
   isNewsRepresentative,
 } from "~/models/representative.server";
@@ -66,7 +66,7 @@ export default function NewsOrg() {
           </svg>
         </Link>
         <Link
-          to={`/noticias/${newsId}/nova`}
+          to={`/noticias/${newsId}/`}
           className="flex items-center h-full py-2"
         >
           <img
@@ -99,7 +99,7 @@ export default function NewsOrg() {
           <div className="h-12 w-[5.5rem]"></div>
         )}
       </nav>
-      <div className="h-20" />
+      <div className={newsId === "kolnische-zeitung" ? "h-28" : "h-20"} />
       <Outlet />
     </div>
   );

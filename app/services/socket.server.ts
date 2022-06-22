@@ -26,8 +26,6 @@ export async function sendMessageToUsers({
     .flat()
     .filter((userId) => userId !== senderId);
 
-  console.log(users);
-
   const message: FormattedMessage | null = await getMessageForSocket(messageId);
 
   await fetch("http://localhost:3000/socket/sendMessage", {

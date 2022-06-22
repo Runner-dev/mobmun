@@ -79,7 +79,7 @@ export async function createPublicDocument({
 export async function getPublicDocuments() {
   return prisma.document.findMany({
     select: { id: true, name: true },
-    where: { sharing: { public: true } },
+    where: { sharing: { public: true }, approvalStatus: 1 },
   });
 }
 
@@ -139,6 +139,7 @@ export async function getMediatorDocuments() {
 export function getDocumentById(id: string) {
   return prisma.document.findUnique({
     where: { id },
+    include: { sharing: true },
   });
 }
 
@@ -156,6 +157,16 @@ export function deleteDocument(id: string) {
   return prisma.document.delete({ where: { id } });
 }
 
+export async function updateDocumentApprovalStatus({
+  id,
+  approvalStatus,
+}: {
+  id: string;
+  approvalStatus: number;
+}) {
+  return prisma.document.update({ where: { id }, data: { approvalStatus } });
+}
+
 export async function updateDocument({
   id,
   name,
@@ -164,6 +175,7 @@ export async function updateDocument({
   sharingCountriesIds,
   isPublic,
   sharerId,
+  mediatorComment,
 }: {
   id: string;
   name: string;
@@ -172,6 +184,7 @@ export async function updateDocument({
   sharingCountriesIds: string[];
   isPublic: boolean;
   sharerId: string;
+  mediatorComment: string;
 }) {
   const currentSharing = await prisma.sharing.findFirst({
     where: { document: { id } },
@@ -182,6 +195,7 @@ export async function updateDocument({
     data: {
       name,
       approvalStatus,
+      mediatorComment,
       sharing: {
         update: {
           allianceId,

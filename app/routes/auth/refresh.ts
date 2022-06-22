@@ -39,8 +39,6 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
   const response = await result.json();
 
-  console.log(response);
-
   if (!response || !response.access_token || !response.expires_in) {
     console.error("Google Acess token error");
     throw new Response("Error", { status: 500 });

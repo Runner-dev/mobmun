@@ -1,9 +1,7 @@
-import { Alliance, Country } from "@prisma/client";
-import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
-import { getAllianceByUser, getAlliances } from "~/models/alliance.server";
-import type { Announcement } from "~/models/announcement.server";
-import { getAnnouncements } from "~/models/announcement.server";
+import type { Country } from "@prisma/client";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { getCountries } from "~/models/country.server";
 
 type LoaderData = {

@@ -1,5 +1,6 @@
-import type { LoaderFunction } from "remix";
-import { json, Outlet } from "remix";
+import { Outlet } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { mediatorGuard } from "~/services/auth.server";
 
 export const loader: LoaderFunction = async ({ request }) => {

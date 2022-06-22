@@ -1,7 +1,7 @@
 import type { Country, User } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { redirect } from "remix";
-import { Form, json, Link, useLoaderData } from "remix";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { StyledInput, StyledSelect } from "~/components/StyledInputs";
 import { getCountries } from "~/models/country.server";

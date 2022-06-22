@@ -1,6 +1,7 @@
 import type { Country, CountryRepresentative } from "@prisma/client";
-import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
+import { useLoaderData, Link } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { getCountryRepresentatives } from "~/models/representative.server";
 
 type LoaderData = {

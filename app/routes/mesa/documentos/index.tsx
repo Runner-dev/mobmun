@@ -1,9 +1,8 @@
-import { Document } from "@prisma/client";
-import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
-import type { Announcement } from "~/models/announcement.server";
-import { getAnnouncements } from "~/models/announcement.server";
-import { getDocuments, getMediatorDocuments } from "~/models/document.server";
+import type { Document } from "@prisma/client";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
+import { getMediatorDocuments } from "~/models/document.server";
 
 type LoaderData = {
   documents: Document[];
